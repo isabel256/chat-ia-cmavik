@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat IA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+    #chat {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .message {
+      max-width: 80%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      clear: both;
+    }
+    .user {
+      background: #0084ff;
+      color: white;
+      float: right;
+      text-align: right;
+    }
+    .bot {
+      background: #e5e5ea;
+      color: black;
+      float: left;
+      text-align: left;
+    }
+    #input-area {
+      display: flex;
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ccc;
+    }
+    #input-message {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+    }
+    #send-btn {
+      background: #0084ff;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      margin-left: 10px;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      .message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+  <div id="input-area">
+    <input type="text" id="input-message" placeholder="Escribe tu mensaje..." />
+    <button id="send-btn">Enviar</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input-message');
+    const sendBtn = document.getElementById('send-btn');
+
+    function appendMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', sender);
+      msg.textContent = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      appendMessage(text, 'user');
+      input.value = '';
+      try {
+        const response = await fetch('https://cmavik-ia.onrender.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
+        const data = await response.json();
+        appendMessage(data.reply, 'bot');
+      } catch (error) {
+        appendMessage('Error: No se pudo conectar con el servidor.', 'bot');
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
